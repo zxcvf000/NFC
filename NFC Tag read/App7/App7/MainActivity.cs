@@ -12,7 +12,7 @@ using System.Text;
 namespace App7
 {
     [Activity(Label = "App7", MainLauncher = true, Icon = "@drawable/icon", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
-    [IntentFilter(new[] { Intent.ActionSend, NfcAdapter.ActionNdefDiscovered }, Categories = new[] {
+    [IntentFilter(new[] {NfcAdapter.ActionNdefDiscovered }, Categories = new[] {
     Intent.CategoryDefault,
     }, DataMimeType = "text/plain")]
     public class MainActivity : Activity
@@ -74,7 +74,7 @@ namespace App7
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
-            _textview.Text = "onNewIntent";
+            //_textview.Text = "onNewIntent";
 
             var tag = intent.GetParcelableExtra(NfcAdapter.ExtraTag) as Tag;
 
