@@ -6,7 +6,7 @@
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
   <application android:label="App7" android:name="android.app.Application" android:allowBackup="true" android:icon="@drawable/icon" android:debuggable="true">
-    <activity android:icon="@drawable/icon" android:label="App7" android:name="md54852b34f058761177f88eefeb1d77412.MainActivity">
+    <activity android:icon="@drawable/icon" android:label="App7" android:launchMode="singleTask" android:name="md54852b34f058761177f88eefeb1d77412.MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

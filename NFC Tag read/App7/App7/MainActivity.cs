@@ -11,7 +11,7 @@ using System.Text;
 
 namespace App7
 {
-    [Activity(Label = "App7", MainLauncher = true, Icon = "@drawable/icon")]
+    [Activity(Label = "App7", MainLauncher = true, Icon = "@drawable/icon", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
     [IntentFilter(new[] { Intent.ActionSend, NfcAdapter.ActionNdefDiscovered }, Categories = new[] {
     Intent.CategoryDefault,
     }, DataMimeType = "text/plain")]
@@ -19,14 +19,27 @@ namespace App7
     {
         private TextView _textview;
         private NfcAdapter _nfcAdapter;
+        private PendingIntent mPendingIntent;
+        private IntentFilter ndefDetected;
+        private IntentFilter[] intentF;
 
-        protected override void OnCreate(Bundle bundle)
+    protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
 
             SetContentView(Resource.Layout.Main);
             _textview = FindViewById<TextView>(Resource.Id.textview);
-            
+            Intent Myintent = new Intent(this, GetType());
+            Myintent.SetFlags(ActivityFlags.SingleTop);
+            mPendingIntent = PendingIntent.GetActivity(this, 0, Myintent, 0);
+            ndefDetected = new IntentFilter(NfcAdapter.ActionNdefDiscovered);
+            try
+            {
+                ndefDetected.AddDataType("text/plain");
+            }
+            catch {};
+            intentF = new IntentFilter[] {ndefDetected};
+
             _nfcAdapter = NfcAdapter.GetDefaultAdapter(this);
 
             if (_nfcAdapter != null && _nfcAdapter.IsEnabled)
@@ -42,18 +55,32 @@ namespace App7
         protected override void OnPause()
         {
             base.OnPause();
-            _textview.Text = "OnPause";
-            //test(new Intent());
+            //_textview.Text = "OnPause";
+            
+            NfcManager manager = (NfcManager)GetSystemService(NfcService);
+            NfcAdapter adapter = manager.DefaultAdapter;
+            adapter.DisableForegroundDispatch(this);
         }
 
         protected override void OnResume()
         {
             base.OnResume();
-            _textview.Text = "OnResume";
-            var tag = Intent.GetParcelableExtra(NfcAdapter.ExtraTag) as Tag;
+            //_textview.Text = "OnResume";
+
+            NfcManager manager = (NfcManager)GetSystemService(NfcService);
+            manager.DefaultAdapter.EnableForegroundDispatch(this, mPendingIntent, intentF, null);
+        }
+        
+        protected override void OnNewIntent(Intent intent)
+        {
+            base.OnNewIntent(intent);
+            _textview.Text = "onNewIntent";
+
+            var tag = intent.GetParcelableExtra(NfcAdapter.ExtraTag) as Tag;
+
             if (tag != null)
             {
-                IParcelable[] rawMsgs = Intent.GetParcelableArrayExtra(NfcAdapter.ExtraNdefMessages);
+                IParcelable[] rawMsgs = intent.GetParcelableArrayExtra(NfcAdapter.ExtraNdefMessages);
 
                 if (rawMsgs != null)
                 {
@@ -68,31 +95,6 @@ namespace App7
                     }
                 }
             }
-        }
-
-
-        /*private void test(Intent intent)
-        {
-            var tag = intent.GetParcelableExtra(NfcAdapter.ExtraTag) as Tag;
-
-            if (tag != null)
-            {
-                var ndef = Ndef.Get(tag);
-                var ndefmessage = ndef.CachedNdefMessage;
-                NdefRecord[] record = ndefmessage.GetRecords();
-                while (record != null)
-                {
-                    _textview.Text = record.ToString();
-                }
-            }
-        }*/
-
-        protected override void OnNewIntent(Intent intent)
-        {
-            base.OnNewIntent(intent);
-            _textview.Text = "onNewIntent";
-            
-
         }
     }
 }
